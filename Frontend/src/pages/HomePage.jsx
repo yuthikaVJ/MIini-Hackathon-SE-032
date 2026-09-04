@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Search, Award, Clock, MapPin, Send, ArrowRight, Wrench, Zap, Wind, Sparkles, Scissors, Car, Paintbrush, Hammer, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Search, Award, Clock, MapPin, Send, ArrowRight, Wrench, Zap, Wind, Sparkles, Scissors, Car, Paintbrush, Hammer, CheckCircle2, UserPlus } from 'lucide-react';
 import SearchBar from '../components/search/SearchBar.jsx';
 import ProviderCard from '../components/provider/ProviderCard.jsx';
+import RegisterModal from '../components/common/RegisterModal.jsx';
 import { providerService } from '../services/providerService.js';
 import { SERVICE_CATEGORIES } from '../data/mockServices.js';
 
@@ -22,6 +23,7 @@ function HomePage() {
   const navigate = useNavigate();
   const [featuredProviders, setFeaturedProviders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadFeatured() {
@@ -89,6 +91,13 @@ function HomePage() {
                 className="btn btn-primary btn-lg"
               >
                 <Search size={18} /> Find a Service
+              </button>
+              <button
+                onClick={() => setRegisterModalOpen(true)}
+                className="btn btn-secondary btn-lg"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.3)' }}
+              >
+                <UserPlus size={18} /> Register Account
               </button>
             </div>
           </div>
@@ -382,14 +391,29 @@ function HomePage() {
           <p style={{ color: 'var(--color-text-subtle)', fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-xl)' }}>
             Search verified local professionals for plumbing, electrical work, cleaning, AC repairs, and more.
           </p>
-          <button
-            onClick={() => navigate('/search')}
-            className="btn btn-primary btn-lg"
-          >
-            <Search size={18} /> Find a Service
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => navigate('/search')}
+              className="btn btn-primary btn-lg"
+            >
+              <Search size={18} /> Find a Service
+            </button>
+            <button
+              onClick={() => setRegisterModalOpen(true)}
+              className="btn btn-secondary btn-lg"
+              style={{ backgroundColor: 'transparent', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.4)' }}
+            >
+              <UserPlus size={18} /> Register Now
+            </button>
+          </div>
         </div>
       </section>
+
+      {/* Registration Modal */}
+      <RegisterModal
+        isOpen={registerModalOpen}
+        onClose={() => setRegisterModalOpen(false)}
+      />
     </div>
   );
 }

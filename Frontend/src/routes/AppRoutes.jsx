@@ -3,6 +3,9 @@ import { Routes, Route, Link } from 'react-router-dom';
 import HomePage from '../pages/HomePage.jsx';
 import ProviderSearchResultsPage from '../pages/ProviderSearchResultsPage.jsx';
 import ProviderProfilePage from '../pages/ProviderProfilePage.jsx';
+import RequestServicePage from '../pages/RequestServicePage.jsx';
+import CustomerDashboardPage from '../pages/CustomerDashboardPage.jsx';
+import ProviderDashboardPage from '../pages/ProviderDashboardPage.jsx';
 
 function AppRoutes() {
   return (
@@ -11,18 +14,14 @@ function AppRoutes() {
       <Route path="/search" element={<ProviderSearchResultsPage />} />
       <Route path="/providers/:id" element={<ProviderProfilePage />} />
       
-      {/* Safe handoff route placeholder for Booking owner */}
-      <Route path="/booking/new" element={
-        <div className="container" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#0f172a' }}>
-            Request Service & Booking Handoff
-          </h2>
-          <p style={{ color: '#64748b', maxWidth: '600px', margin: '0 auto 2rem' }}>
-            This route (<code style={{ background: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>/booking/new</code>) is the handoff target for the booking module owned by Frontend Member 2.
-          </p>
-          <Link to="/" className="btn btn-primary">Return to Home</Link>
-        </div>
-      } />
+      {/* Booking Form Routes */}
+      <Route path="/request-service/:providerId" element={<RequestServicePage />} />
+      <Route path="/request-service" element={<RequestServicePage />} />
+      <Route path="/booking/new" element={<RequestServicePage />} />
+
+      {/* Booking Dashboards */}
+      <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
+      <Route path="/provider/dashboard" element={<ProviderDashboardPage />} />
 
       {/* 404 Fallback */}
       <Route path="*" element={
@@ -37,3 +36,4 @@ function AppRoutes() {
 }
 
 export default AppRoutes;
+
