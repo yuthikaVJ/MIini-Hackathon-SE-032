@@ -10,6 +10,7 @@ function RegisterModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     phone: '0771234567',
     location: 'Colombo'
   });
@@ -35,19 +36,21 @@ function RegisterModal({ isOpen, onClose }) {
     } else if (!/\S+@\S+\.\S+/.test(formData.email.trim())) {
       errs.email = 'Enter a valid email address.';
     }
+    if (!formData.password) errs.password = 'Password is required.';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      authService.registerUser({
+    try {
+      await authService.registerUser({
         name: formData.name,
         email: formData.email,
+        password: formData.password,
         role: role,
         phone: formData.phone,
         location: formData.location
@@ -56,7 +59,10 @@ function RegisterModal({ isOpen, onClose }) {
       setIsSubmitting(false);
       onClose();
       navigate('/'); // Navigate to home page
-    }, 300);
+    } catch (err) {
+      setErrors({ ...errors, email: err.message || 'Registration failed' });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -234,6 +240,23 @@ function RegisterModal({ isOpen, onClose }) {
               onChange={handleChange}
             />
             {errors.email && <span className="form-error-msg">{errors.email}</span>}
+          </div>
+
+          {/* Password */}
+          <div className="form-group">
+            <label className="form-label" htmlFor="regPassword">
+              Password <span style={{ color: 'var(--color-error)' }}>*</span>
+            </label>
+            <input
+              id="regPassword"
+              type="password"
+              name="password"
+              className="form-control"
+              placeholder="Create a password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+            {errors.password && <span className="form-error-msg">{errors.password}</span>}
           </div>
 
           {/* City / Location */}

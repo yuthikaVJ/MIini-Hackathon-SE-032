@@ -1,87 +1,99 @@
-import { MOCK_PROVIDERS } from '../data/mockProviders.js';
+import { apiFetch } from './api';
 import { SERVICE_CATEGORIES } from '../data/mockServices.js';
 
-/**
- * Service layer abstraction for HelaConnect Provider API.
- * Currently backed by mock data for Hackathon MVP, structured to be 
- * easily swapped with REST API endpoints (e.g. fetch('/api/providers?...')).
- */
+// Map backend provider schema to frontend expected schema
+const mapProvider = (backendProv) => {
+  return {
+    _id: backendProv.user?._id || backendProv._id, // use User ID for booking references
+    profileId: backendProv._id,
+    name: backendProv.user?.name || 'Service Provider',
+    title: backendProv.user?.name || 'Service Provider',
+    category: backendProv.serviceCategory || 'General',
+    location: backendProv.location || 'Unknown',
+    rating: backendProv.rating || 0,
+    reviewCount: backendProv.reviewCount || 0,
+    hourlyRate: backendProv.minPrice || 1000, // Ensure it's a number for toLocaleString()
+    verified: true,
+    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&auto=format&fit=crop&q=80',
+    bio: backendProv.description || 'No description provided.',
+    experienceYears: backendProv.experience ? parseInt(backendProv.experience) || 5 : 5,
+    services: [
+      { 
+        id: 's1', 
+        name: `${backendProv.serviceCategory || 'General'} Service`, 
+        price: backendProv.minPrice || 1000, 
+        description: 'Standard service booking'
+      }
+    ],
+    availability: (backendProv.availableDays || []).map((day, idx) => ({
+      date: day, 
+      day: day,
+      startTime: '09:00 AM',
+      endTime: '05:00 PM'
+    })),
+    reviews: [],
+    contact: {
+      phone: backendProv.user?.phone || '',
+      email: backendProv.user?.email || ''
+    }
+  };
+};
+
 export const providerService = {
-  /**
-   * Fetch all providers with simulated network latency
-   */
   async getAllProviders() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([...MOCK_PROVIDERS]);
-      }, 200);
-    });
+    try {
+      const data = await apiFetch('/api/providers');
+      return data.map(mapProvider);
+    } catch (err) {
+      console.error('Error fetching providers:', err);
+      return [];
+    }
   },
 
-  /**
-   * Fetch single provider by ID
-   */
   async getProviderById(id) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const provider = MOCK_PROVIDERS.find((p) => p._id === id);
-        if (provider) {
-          resolve({ ...provider });
-        } else {
-          reject(new Error(`Provider with ID '${id}' not found.`));
-        }
-      }, 150);
-    });
+    try {
+      // In our backend, the API /api/providers/:id expects the user ID (since bookings use user ID)
+      // Actually, wait, let's fetch all and find the one. The backend GET /api/providers/:id expects profile ID or user ID?
+      // Our backend GET /api/providers fetches all. Let's just fetch all and filter by user._id for the frontend mock compatibility.
+      const data = await apiFetch('/api/providers');
+      const provider = data.find(p => p.user?._id === id || p._id === id);
+      if (!provider) throw new Error('Provider not found');
+      return mapProvider(provider);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   },
 
-  /**
-   * Search and filter providers based on service category/keyword, location, date, and preferred time
-   */
   async searchProviders({ service = '', location = '', date = '', time = '' }) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const queryService = service.trim().toLowerCase();
-        const queryLocation = location.trim().toLowerCase();
+    try {
+      const providers = await this.getAllProviders();
+      
+      const queryService = service.trim().toLowerCase();
+      const queryLocation = location.trim().toLowerCase();
 
-        const results = MOCK_PROVIDERS.filter((provider) => {
-          // Service category or title or service item match
-          const matchesService =
-            !queryService ||
-            provider.category.toLowerCase().includes(queryService) ||
-            provider.title.toLowerCase().includes(queryService) ||
-            provider.services.some((s) => s.name.toLowerCase().includes(queryService));
+      return providers.filter((provider) => {
+        const matchesService =
+          !queryService ||
+          provider.category.toLowerCase().includes(queryService) ||
+          provider.title.toLowerCase().includes(queryService);
 
-          // Location match
-          const matchesLocation =
-            !queryLocation ||
-            provider.location.toLowerCase().includes(queryLocation);
+        const matchesLocation =
+          !queryLocation ||
+          provider.location.toLowerCase().includes(queryLocation);
 
-          // Date match (if specified, check if provider has availability on that date)
-          const matchesDate =
-            !date ||
-            provider.availability.some((slot) => slot.date === date);
+        const matchesDate =
+          !date ||
+          provider.availability.some((slot) => slot.date === date);
 
-          // Time match (if specified, verify slot time range)
-          const matchesTime =
-            !time ||
-            provider.availability.some((slot) => {
-              // If date is also specified, must match slot date
-              if (date && slot.date !== date) return false;
-              // Check if time is within slot's startTime and endTime
-              return time >= slot.startTime && time <= slot.endTime;
-            });
-
-          return matchesService && matchesLocation && matchesDate && matchesTime;
-        });
-
-        resolve(results);
-      }, 300);
-    });
+        return matchesService && matchesLocation && matchesDate;
+      });
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
   },
 
-  /**
-   * Get list of service categories
-   */
   async getServiceCategories() {
     return Promise.resolve([...SERVICE_CATEGORIES]);
   }
