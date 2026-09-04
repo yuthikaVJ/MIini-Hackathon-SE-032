@@ -35,8 +35,8 @@ function ProviderProfilePage() {
   }, [id]);
 
   const handleRequestServiceCTA = () => {
-    // Integration handoff target for Member 2's booking module:
-    const targetUrl = `/booking/new?providerId=${id}${selectedServiceId ? `&serviceId=${selectedServiceId}` : ''}`;
+    // Navigating to Frontend Part 2 booking request page
+    const targetUrl = `/request-service/${id}${selectedServiceId ? `?serviceId=${selectedServiceId}` : ''}`;
     navigate(targetUrl);
   };
 
