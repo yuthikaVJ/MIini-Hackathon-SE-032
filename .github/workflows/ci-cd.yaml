@@ -34,7 +34,7 @@ jobs:
             - name: Build and Push Frontend Image
               uses: docker/build-push-action@v4
               with:
-                context: ./frontend
+                context: ./Frontend
                 push: true
                 tags: ${{ secrets.DOCKER_USERNAME }}/minihackathon-frontend:latest
     deploy:
