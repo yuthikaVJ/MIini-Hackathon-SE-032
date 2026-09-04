@@ -47,10 +47,9 @@ jobs:
                 username: ${{ secrets.EC2_USER }}
                 key: ${{ secrets.EC2_KEY }}
                 script: |
-                  cd /home/ubuntu/MERN-App-with-CICD-Pipeline
-                  docker pull ${{ secrets.DOCKER_USERNAME }}/mern-backend:latest
-                  docker pull ${{ secrets.DOCKER_USERNAME }}/mern-frontend:latest
-
+                  cd /home/ubuntu/minihackathon
+                  docker pull ${{ secrets.DOCKER_USERNAME }}/minihackathon-backend:latest
+                  docker pull ${{ secrets.DOCKER_USERNAME }}/minihackathon-frontend:latest
                   export MONGO_URI="${{ secrets.MONGO_URI }}"
 
                   docker-compose down
