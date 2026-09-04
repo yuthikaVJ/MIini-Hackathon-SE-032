@@ -51,7 +51,75 @@ const getProviderById = async (req, res) => {
     }
 };
 
+// @desc    Create or update provider profile
+// @route   POST /api/providers/profile
+// @access  Private/Provider
+const createOrUpdateProfile = async (req, res) => {
+    try {
+        const {
+            serviceCategory,
+            location,
+            experience,
+            minPrice,
+            maxPrice,
+            description,
+            availableDays
+        } = req.body;
+
+        const profileFields = {
+            user: req.user._id,
+            serviceCategory,
+            location,
+            experience,
+            minPrice,
+            maxPrice,
+            description,
+            availableDays
+        };
+
+        // Check if profile exists
+        let profile = await ProviderProfile.findOne({ user: req.user._id });
+
+        if (profile) {
+            // Update
+            profile = await ProviderProfile.findOneAndUpdate(
+                { user: req.user._id },
+                { $set: profileFields },
+                { new: true }
+            );
+            return res.json(profile);
+        }
+
+        // Create
+        profile = new ProviderProfile(profileFields);
+        await profile.save();
+        res.status(201).json(profile);
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get current provider's profile
+// @route   GET /api/providers/profile/me
+// @access  Private/Provider
+const getMyProviderProfile = async (req, res) => {
+    try {
+        const profile = await ProviderProfile.findOne({ user: req.user._id }).populate('user', 'name email phone');
+
+        if (!profile) {
+            return res.status(404).json({ message: 'There is no profile for this provider' });
+        }
+
+        res.json(profile);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getProviders,
-    getProviderById
+    getProviderById,
+    createOrUpdateProfile,
+    getMyProviderProfile
 };

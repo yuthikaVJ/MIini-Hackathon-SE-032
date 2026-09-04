@@ -4,9 +4,17 @@ const {
     getUserProfile,
     updateUserProfile,
     addFavoriteProvider,
-    removeFavoriteProvider
+    removeFavoriteProvider,
+    getUsers,
+    updateUserRole
 } = require('../controllers/userController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, adminAuth } = require('../middleware/authMiddleware');
+
+router.route('/')
+    .get(protect, adminAuth, getUsers);
+
+router.route('/:id/role')
+    .put(protect, adminAuth, updateUserRole);
 
 router.route('/me')
     .get(protect, getUserProfile)
