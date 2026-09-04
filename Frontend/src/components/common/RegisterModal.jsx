@@ -30,11 +30,15 @@ function RegisterModal({ isOpen, onClose }) {
 
   const validate = () => {
     const errs = {};
-    if (!formData.name.trim()) errs.name = 'Full name is required.';
-    if (!formData.email.trim()) {
-      errs.email = 'Email address is required.';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email.trim())) {
-      errs.email = 'Enter a valid email address.';
+    if (!formData.name.trim()) {
+      errs.name = 'Name is required.';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      errs.email = 'Please enter a valid email address.';
+    }
+    if (!formData.password || formData.password.length < 6) {
+      errs.password = 'Password must be at least 6 characters.';
     }
     if (!formData.password) errs.password = 'Password is required.';
     setErrors(errs);

@@ -23,6 +23,14 @@ const bookingSchema = new mongoose.Schema({
         type: String, // e.g., "2024-11-20"
         required: true,
     },
+    requestedTime: {
+        type: String, // e.g., "09:00 AM"
+        required: true,
+    },
+    location: {
+        type: String, // e.g., "Colombo 03"
+        required: true,
+    },
     status: {
         type: String,
         enum: ['pending', 'accepted', 'rejected'],

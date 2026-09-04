@@ -22,8 +22,9 @@ const mapBooking = (b) => {
     providerCategory: b.provider?.serviceCategory || 'Service',
     serviceName: b.service || 'Service',
     requestedDate: b.requestedDate ? new Date(b.requestedDate).toISOString().split('T')[0] : '',
+    requestedTime: b.requestedTime || '',
     confirmedTimeSlot: b.assignedTimeSlot || null,
-    location: b.customer?.location || 'Not provided',
+    location: b.location || b.customer?.location || 'Not provided',
     description: b.description || '',
     status: (b.status || 'PENDING').toUpperCase(),
     createdAt: b.createdAt
@@ -39,7 +40,9 @@ export const bookingService = {
           providerId: bookingData.providerId,
           service: bookingData.serviceName,
           description: bookingData.description,
-          requestedDate: bookingData.requestedDate
+          requestedDate: bookingData.requestedDate,
+          requestedTime: bookingData.requestedTime,
+          location: bookingData.location
         })
       });
       return mapBooking(data);

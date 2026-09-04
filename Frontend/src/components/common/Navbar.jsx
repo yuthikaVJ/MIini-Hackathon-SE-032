@@ -3,10 +3,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Home, Menu, X, ShieldCheck, Calendar, Briefcase, User, UserPlus, LogOut, ChevronDown, Repeat } from 'lucide-react';
 import { authService } from '../../services/authService.js';
 import RegisterModal from './RegisterModal.jsx';
+import LoginModal from './LoginModal.jsx';
 
 function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(() => authService.getCurrentUser());
 
@@ -130,44 +132,48 @@ function Navbar() {
             Find Services
           </Link>
 
-          <Link
-            to="/customer/dashboard"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontWeight: '600',
-              fontSize: '0.95rem',
-              color: isActive('/customer/dashboard') ? '#0284c7' : '#475569',
-              borderBottom: isActive('/customer/dashboard') ? '2px solid #0284c7' : '2px solid transparent',
-              padding: '0.5rem 0'
-            }}
-          >
-            <Calendar size={18} />
-            My Bookings
-          </Link>
+          {currentUser?.role !== 'PROVIDER' && (
+            <Link
+              to="/customer/dashboard"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontWeight: '600',
+                fontSize: '0.95rem',
+                color: isActive('/customer/dashboard') ? '#0284c7' : '#475569',
+                borderBottom: isActive('/customer/dashboard') ? '2px solid #0284c7' : '2px solid transparent',
+                padding: '0.5rem 0'
+              }}
+            >
+              <Calendar size={18} />
+              My Bookings
+            </Link>
+          )}
 
-          <Link
-            to="/provider/dashboard"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontWeight: '600',
-              fontSize: '0.95rem',
-              color: isActive('/provider/dashboard') ? '#0284c7' : '#475569',
-              borderBottom: isActive('/provider/dashboard') ? '2px solid #0284c7' : '2px solid transparent',
-              padding: '0.5rem 0'
-            }}
-          >
-            <Briefcase size={18} />
-            Provider Portal
-          </Link>
+          {currentUser?.role === 'PROVIDER' && (
+            <Link
+              to="/provider/dashboard"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontWeight: '600',
+                fontSize: '0.95rem',
+                color: isActive('/provider/dashboard') ? '#0284c7' : '#475569',
+                borderBottom: isActive('/provider/dashboard') ? '2px solid #0284c7' : '2px solid transparent',
+                padding: '0.5rem 0'
+              }}
+            >
+              <Briefcase size={18} />
+              Provider Portal
+            </Link>
+          )}
 
           {/* TOP RIGHT CORNER: LOGGED IN PROFILE OR REGISTER BUTTON */}
           <div style={{ marginLeft: '0.5rem', position: 'relative' }}>
             {currentUser ? (
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   style={{
@@ -184,7 +190,7 @@ function Navbar() {
                   id="user-profile-badge"
                 >
                   <img
-                    src={currentUser.avatar || 'https://via.placeholder.com/32'}
+                    src={currentUser.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
                     alt={currentUser.name}
                     style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }}
                   />
@@ -198,10 +204,31 @@ function Navbar() {
                       color: currentUser.role === 'PROVIDER' ? 'var(--color-success-text)' : 'var(--color-primary-dark)',
                       textTransform: 'uppercase'
                     }}>
-                      {currentUser.role === 'PROVIDER' ? 'Service Provider' : 'Service Receiver'}
+                      {currentUser.role === 'PROVIDER' ? 'Service Provider' : 'Customer'}
                     </span>
                   </div>
                   <ChevronDown size={14} color="var(--color-text-muted)" />
+                </button>
+
+                {/* Direct Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  title="Logout"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'var(--color-error-bg)',
+                    color: 'var(--color-error-text)',
+                    border: '1px solid var(--color-error-border)',
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    transition: 'var(--transition)'
+                  }}
+                >
+                  <LogOut size={16} />
                 </button>
 
                 {/* Profile Dropdown Menu */}
@@ -209,7 +236,7 @@ function Navbar() {
                   <div style={{
                     position: 'absolute',
                     top: '115%',
-                    right: 0,
+                    right: '40px',
                     width: '240px',
                     backgroundColor: '#ffffff',
                     borderRadius: 'var(--radius-md)',
@@ -227,10 +254,44 @@ function Navbar() {
                       </div>
                       <div style={{ marginTop: '0.3rem' }}>
                         <span className={`badge ${currentUser.role === 'PROVIDER' ? 'badge-success' : 'badge-primary'}`}>
-                          {currentUser.role === 'PROVIDER' ? 'Service Provider' : 'Service Receiver'}
+                          {currentUser.role === 'PROVIDER' ? 'Service Provider' : 'Customer'}
                         </span>
                       </div>
                     </div>
+
+                    <Link
+                      to="/edit-profile"
+                      onClick={() => setProfileDropdownOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        color: 'var(--color-secondary)'
+                      }}
+                    >
+                      <User size={16} /> Edit Profile
+                    </Link>
+
+                    {currentUser.role === 'PROVIDER' && (
+                      <Link
+                        to="/provider/settings"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          padding: '0.6rem 1rem',
+                          fontSize: '0.85rem',
+                          fontWeight: '600',
+                          color: 'var(--color-secondary)'
+                        }}
+                      >
+                        <Briefcase size={16} /> Service Profile
+                      </Link>
+                    )}
 
                     <Link
                       to={currentUser.role === 'PROVIDER' ? '/provider/dashboard' : '/customer/dashboard'}
@@ -245,7 +306,7 @@ function Navbar() {
                         color: 'var(--color-secondary)'
                       }}
                     >
-                      <User size={16} /> My Dashboard
+                      <Calendar size={16} /> My Dashboard
                     </Link>
 
                     <button
@@ -265,41 +326,28 @@ function Navbar() {
                         cursor: 'pointer'
                       }}
                     >
-                      <Repeat size={16} /> Switch to {currentUser.role === 'PROVIDER' ? 'Receiver' : 'Provider'}
+                      <Repeat size={16} /> Switch to {currentUser.role === 'PROVIDER' ? 'Customer' : 'Provider'}
                     </button>
-
-                    <div style={{ borderTop: '1px solid var(--color-border-light)', marginTop: '0.3rem' }}>
-                      <button
-                        onClick={handleLogout}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          width: '100%',
-                          textAlign: 'left',
-                          padding: '0.6rem 1rem',
-                          fontSize: '0.85rem',
-                          fontWeight: '600',
-                          color: 'var(--color-error-text)',
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <LogOut size={16} /> Logout
-                      </button>
-                    </div>
                   </div>
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => setRegisterModalOpen(true)}
-                className="btn btn-primary"
-                style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)' }}
-              >
-                <UserPlus size={16} /> Register
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => setLoginModalOpen(true)}
+                  className="btn btn-outline"
+                  style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)' }}
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={() => setRegisterModalOpen(true)}
+                  className="btn btn-primary"
+                  style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)' }}
+                >
+                  <UserPlus size={16} /> Register
+                </button>
+              </div>
             )}
           </div>
         </nav>
@@ -383,36 +431,40 @@ function Navbar() {
             <Search size={18} />
             Find Services & Providers
           </Link>
-          <Link
-            to="/customer/dashboard"
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-              fontWeight: '600',
-              color: isActive('/customer/dashboard') ? '#0284c7' : '#334155',
-              padding: '0.5rem 0'
-            }}
-          >
-            <Calendar size={18} />
-            My Bookings
-          </Link>
-          <Link
-            to="/provider/dashboard"
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-              fontWeight: '600',
-              color: isActive('/provider/dashboard') ? '#0284c7' : '#334155',
-              padding: '0.5rem 0'
-            }}
-          >
-            <Briefcase size={18} />
-            Provider Portal
-          </Link>
+          {currentUser?.role !== 'PROVIDER' && (
+            <Link
+              to="/customer/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                fontWeight: '600',
+                color: isActive('/customer/dashboard') ? '#0284c7' : '#334155',
+                padding: '0.5rem 0'
+              }}
+            >
+              <Calendar size={18} />
+              My Bookings
+            </Link>
+          )}
+          {currentUser?.role === 'PROVIDER' && (
+            <Link
+              to="/provider/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                fontWeight: '600',
+                color: isActive('/provider/dashboard') ? '#0284c7' : '#334155',
+                padding: '0.5rem 0'
+              }}
+            >
+              <Briefcase size={18} />
+              Provider Portal
+            </Link>
+          )}
 
           {!currentUser ? (
             <button
@@ -443,6 +495,12 @@ function Navbar() {
       <RegisterModal
         isOpen={registerModalOpen}
         onClose={() => setRegisterModalOpen(false)}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
       />
 
       {/* Responsive Inline CSS */}

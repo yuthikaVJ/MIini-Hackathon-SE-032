@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, User, Phone, Check, X, CheckCircle2, AlertCircle, Filter, Sparkles, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Calendar, Clock, MapPin, User, Phone, Check, X, CheckCircle2, AlertCircle, Filter, Sparkles, RefreshCw, Settings } from 'lucide-react';
 import BookingStatusBadge from '../components/booking/BookingStatusBadge.jsx';
 import { bookingService, AVAILABLE_TIME_SLOTS } from '../services/bookingService.js';
 import { MOCK_PROVIDERS } from '../data/mockProviders.js';
 
 function ProviderDashboardPage() {
-  const [selectedProviderId, setSelectedProviderId] = useState('prov_101');
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,8 +23,8 @@ function ProviderDashboardPage() {
   const loadProviderBookings = async () => {
     setLoading(true);
     try {
-      // Get all bookings or provider specific
-      const data = await bookingService.getProviderBookings(selectedProviderId === 'ALL' ? null : selectedProviderId);
+      // Fetch bookings for the logged-in provider
+      const data = await bookingService.getProviderBookings();
       setBookings(data);
     } catch (err) {
       console.error("Error loading provider bookings:", err);
@@ -35,7 +35,7 @@ function ProviderDashboardPage() {
 
   useEffect(() => {
     loadProviderBookings();
-  }, [selectedProviderId]);
+  }, []);
 
   // Handle Accept Action
   const handleAccept = async (bookingId) => {
@@ -108,7 +108,7 @@ function ProviderDashboardPage() {
     return acc;
   }, {});
 
-  const selectedProviderName = MOCK_PROVIDERS.find(p => p._id === selectedProviderId)?.name || 'All Service Providers';
+  const selectedProviderName = 'My';
 
   return (
     <div style={{ padding: '2rem 0 5rem' }}>
@@ -134,26 +134,11 @@ function ProviderDashboardPage() {
           </div>
 
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* Provider Switcher Selector (for Hackathon Demo) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span className="text-subtle" style={{ fontWeight: '600' }}>Active Provider:</span>
-              <select
-                value={selectedProviderId}
-                onChange={(e) => setSelectedProviderId(e.target.value)}
-                className="form-control"
-                style={{ width: 'auto', minHeight: '38px', fontSize: 'var(--font-size-xs)', fontWeight: '600' }}
-              >
-                <option value="ALL">All Providers (Global View)</option>
-                {MOCK_PROVIDERS.map(p => (
-                  <option key={p._id} value={p._id}>
-                    {p.name} ({p.category})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button onClick={handleResetData} className="btn btn-secondary" style={{ minHeight: '38px' }}>
-              <RefreshCw size={15} /> Reset Demo Data
+            <Link to="/provider/settings" className="btn btn-outline" style={{ minHeight: '38px', padding: '0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+              <Settings size={15} /> Edit Service Profile
+            </Link>
+            <button onClick={loadProviderBookings} className="btn btn-secondary" style={{ minHeight: '38px' }}>
+              <RefreshCw size={15} /> Refresh Data
             </button>
           </div>
         </div>
