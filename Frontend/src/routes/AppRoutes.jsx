@@ -6,6 +6,8 @@ import ProviderProfilePage from '../pages/ProviderProfilePage.jsx';
 import RequestServicePage from '../pages/RequestServicePage.jsx';
 import CustomerDashboardPage from '../pages/CustomerDashboardPage.jsx';
 import ProviderDashboardPage from '../pages/ProviderDashboardPage.jsx';
+import ProviderSettingsPage from '../pages/ProviderSettingsPage.jsx';
+import EditProfilePage from '../pages/EditProfilePage.jsx';
 
 function AppRoutes() {
   return (
@@ -13,6 +15,7 @@ function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/search" element={<ProviderSearchResultsPage />} />
       <Route path="/providers/:id" element={<ProviderProfilePage />} />
+      <Route path="/edit-profile" element={<EditProfilePage />} />
       
       {/* Booking Form Routes */}
       <Route path="/request-service/:providerId" element={<RequestServicePage />} />
@@ -22,6 +25,7 @@ function AppRoutes() {
       {/* Booking Dashboards */}
       <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
       <Route path="/provider/dashboard" element={<ProviderDashboardPage />} />
+      <Route path="/provider/settings" element={<ProviderSettingsPage />} />
 
       {/* 404 Fallback */}
       <Route path="*" element={

@@ -5,18 +5,34 @@ const Booking = require('../models/Booking');
 // @access  Private (Customer)
 const createBooking = async (req, res) => {
     try {
-        const { providerId, service, description, requestedDate } = req.body;
+        const { providerId, service, description, requestedDate, requestedTime, location } = req.body;
 
-        if (!providerId || !service || !description || !requestedDate) {
+        if (!providerId || !service || !description || !requestedDate || !requestedTime || !location) {
             return res.status(400).json({ message: 'Please provide all required fields' });
+        }
+
+        // The frontend might pass the User._id instead of ProviderProfile._id
+        let actualProviderId = providerId;
+        const providerProfile = await require('../models/ProviderProfile').findOne({ user: providerId });
+        
+        if (providerProfile) {
+            actualProviderId = providerProfile._id;
+        } else {
+            // Fallback: check if it's already a ProviderProfile._id
+            const existingProfile = await require('../models/ProviderProfile').findById(providerId);
+            if (!existingProfile) {
+                return res.status(404).json({ message: 'Provider profile not found for this ID' });
+            }
         }
 
         const booking = new Booking({
             customer: req.user._id,
-            provider: providerId,
+            provider: actualProviderId,
             service,
             description,
             requestedDate,
+            requestedTime,
+            location,
             status: 'pending'
         });
 
@@ -57,7 +73,11 @@ const getProviderBookings = async (req, res) => {
         }
 
         const bookings = await Booking.find({ provider: providerProfile._id })
-            .populate('customer', 'name email phone');
+            .populate('customer', 'name email phone')
+            .populate({
+                path: 'provider',
+                populate: { path: 'user', select: 'name email phone' }
+            });
             
         res.json(bookings);
     } catch (error) {
